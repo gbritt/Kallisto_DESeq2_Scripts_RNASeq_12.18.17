@@ -5,11 +5,17 @@
 dds = readRDS('dds.rda')
 sampledata = readRDS('sampledata.rda')
 # Create Wald Test contrasts ----
-WT_Dex_v_Starve_pH_7 = results(dds, contrast=c("Condition","WT_Dex", "WT_Stv_pH7"))
-WT_Dex_v_Starve_pH_5 = results(dds, contrast=c("Condition","WT_Dex", "WT_Stv_pH5"))
-dQ_snf5_Dex_v_Starve_pH_5 = results(dds, contrast=c("Condition","dQ_snf5_Dex", "dQ_snf5_Stv_pH5" ))
-Null_Dex_v_Starve = results(dds, contrast=c("Condition","Null_Dex", "Null_Stv_pH5"))
-HtoA_snf5_Dex_v_Starve_pH_5 = results(dds, contrast=c("Condition","HtoA_snf5_Dex", "HtoA_snf5_Stv_pH5"))
+WT_Dex_v_Starve_pH_7 = results(dds, contrast=c("Condition","WT_Dex", "WT_Stv_pH7"), alpha = 0.05)
+WT_Dex_v_Starve_pH_5 = results(dds, contrast=c("Condition","WT_Dex", "WT_Stv_pH5"), alpha = 0.05)
+dQ_snf5_Dex_v_Starve_pH_5 = results(dds, contrast=c("Condition","dQ_snf5_Dex", "dQ_snf5_Stv_pH5" ), alpha = 0.05)
+Null_Dex_v_Starve = results(dds, contrast=c("Condition","Null_Dex", "Null_Stv_pH5"), alpha = 0.05)
+HtoA_snf5_Dex_v_Starve_pH_5 = results(dds, contrast=c("Condition","HtoA_snf5_Dex", "HtoA_snf5_Stv_pH5"), alpha = 0.05)
+
+summary(WT_Dex_v_Starve_pH_7)
+summary(WT_Dex_v_Starve_pH_5)
+summary(dQ_snf5_Dex_v_Starve_pH_5)
+summary(Null_Dex_v_Starve)
+summary(HtoA_snf5_Dex_v_Starve_pH_5)
 
 
 #now ordering them from greatest to least FC difference ----
