@@ -1,80 +1,60 @@
 #DESeq2_Heatmaps_ect
-#Will need to load in .csv files from DESeq2_Statistical 
+#Will need to load in .csv files from DESeq2_Statistical and datastructure from DESeq2_prepare
 
-library("pheatmap")
-DESeq2Clusterplot = function(filepath='/Users/gbrittingham/Documents/R/R_from macpro/Kallisto_DESeq2_Scripts_RNASeq_12.18.17/Results/DESeq2/Sig_Dif_expressed_genes/WT_DEX_v_starve_pH_5_sig.txt', filename='WT_DEX_v_starve_pH_5_sig', numbergenes = 25){
-    load('dds.rda') #from wherever you saved the data structure
+
+
+DESeq2Clusterplot = function(filepath='/Users/HoltLab/Documents/R/Experiments/RNA_seq_ADH2_Nacho_12.28.17/Results/DESeq2/Sig_Dif_expressed_genes/WT_DEX_v_starve_pH_5_sig.txt', filename='WT_DEX_v_starve_pH_5_sig', numbergenes = 25){
+    library("pheatmap")
+    library("DESeq2")
+    dds = readRDS('dds.rda') #from wherever you saved the data structure (should automatically save in prepare)----
+    sampledata = readRDS('sampledata.rda')# sampledata - these both assume that these are in the current folder - can add to function w/ path if not the case
+    
+    # create filenames
     filename = read.table(filepath, sep = "\t", header = TRUE)
     filenameup = paste(filename,"upinstarve","_",numbergenes, sep = "") 
     filenamedown = paste(filename,"downinstarve","_",numbergenes, sep = "") 
     
+    #filter SigGene lists into up and downregulated genes and cut by number desired ----
     filenamedown = filename[order(filename$log2FoldChange),][1:numbergenes,]
     
-   filenameup = filename[order(filename$log2FoldChange, decreasing = TRUE),][1:numbergenes,]
+    filenameup = filename[order(filename$log2FoldChange, decreasing = TRUE),][1:numbergenes,]
    
-   select = c(rownames(filenameup), rownames(filenamedown))
+    #create master list of all genes you selected ----
+    select = c(rownames(filenameup), rownames(filenamedown))
    
-   #create transformation
-   ntd <- normTransform(dds)
-   
-   
-   cluster = assay(ntd)[select,] # making an object out of genes to be clusterd
-   colnames(cluster)= as.character(samples$sample) #giving colnames to clustered object
+    #create transformation to have a more reasonable distribution of data----
+    ntd <- normTransform(dds) # can probably play with different normalizations here 
    
    
-   shared_results <- t2g[t2g[,2] %in% rownames(cluster),] # subsetting genes to transcripts mapping to add gene names to heatmap
+   cluster = assay(ntd)[select,] # making matrix with gene names and gene counts
+   colnames(cluster)= as.character(sampledata$sample) #giving colnames to clustered object using the 'sampledata' variable created in the prepare script
+   
+   # Adding common names to ens_ids for genes ----
+   shared_results <- t2g[t2g[,2] %in% rownames(cluster),] # Select rownames in the 'gene mapping' matrix that are also in our clustering matrix
    a = as.matrix(shared_results)
-   ordered_genes_mapping <- a[ order(a[,1]), ]# ordering genes mapping
+   ordered_genes_mapping <- a[ order(a[,1]), ]# ordering genes mapping so that the rownames in cluster to be alphabetical
+   cluster <- cluster[ order(row.names(cluster)), ] # order genes in cluster to be alphabetical (will be important below)
    
-   cluster <- cluster[ order(row.names(cluster)), ] # orderign cluster rownames so that they are in     the same order as the gene names we have selected
-   common_and_ens_ids = matrix()
+   common_and_ens_ids = matrix()  # create matrix to hold a pasted name containing common and ens_id names for a gene
+   
+   
    for(i in 1:length(ordered_genes_mapping[,1])){
        common_and_ens_ids[i] = paste(ordered_genes_mapping[i,3], "_",ordered_genes_mapping[i,1], sep = "")
-   }
-   #pasting the common gene name to the ens_id of each gene so we can have both for the heatmap
+   }# paste together each common name with the ens_id (will make heatmap easier to read)
+  
+   rownames(cluster) = common_and_ens_ids # now our cluster rownames contain common names if available
    
-   rownames(cluster) = common_and_ens_ids
-   
+   #create annotations for top of heatmap ----
    df <- as.data.frame(colData(dds)[,c("Condition","GrowthCondition")])
    rownames(df) <- colnames(cluster)
    
+   pheatmap(cluster, cluster_rows=TRUE, show_rownames=TRUE,
+            cluster_cols=TRUE, show_colnames = T, annotation_col = df)
     
 }
-WT_DEX_v_starve_pH_5_sig = read.table("WT_DEX_v_starve_pH_5_sig.txt", sep = "\t", header = TRUE)
-WT_Dex_v_Starve_pH_7_sig = read.table("WT_Dex_v_Starve_pH_7_sig.txt", sep = "\t", header = TRUE)
-
-WT_DEX_v_starve_pH_5_sig_upinstarve_25 = WT_DEX_v_starve_pH_5_sig[order(WT_DEX_v_starve_pH_5_sig$log2FoldChange),][1:25,]
-WT_DEX_v_starve_pH_5_sig_downinstarve_25 = WT_DEX_v_starve_pH_5_sig[order(WT_DEX_v_starve_pH_5_sig$log2FoldChange, decreasing = TRUE),][1:25,]
-
-select = c(rownames(WT_DEX_v_starve_pH_5_sig_upinstarve_25), rownames(WT_DEX_v_starve_pH_5_sig_downinstarve_25))
-
-#create transformation
-ntd <- normTransform(dds)
-df <- as.data.frame(colData(dds)[,"Condition"])
-#df <- as.data.frame(colData(dds)[,c("Condition","GrowthCondition")])
-
-cluster = assay(ntd)[select,] # making an object out of genes to be clusterd
-colnames(cluster)= as.character(samples$sample) #giving colnames to clustered object
 
 
-shared_results <- t2g[t2g[,2] %in% rownames(cluster),] # subsetting genes to transcripts mapping to add gene names to heatmap
-a = as.matrix(shared_results)
-ordered_genes_mapping <- a[ order(a[,1]), ]# ordering genes mapping
-
-cluster <- cluster[ order(row.names(cluster)), ] # orderign cluster rownames so that they are in the same order as the gene names we have selected
-common_and_ens_ids = matrix()
-for(i in 1:length(ordered_genes_mapping[,1])){
-  common_and_ens_ids[i] = paste(ordered_genes_mapping[i,3], "_",ordered_genes_mapping[i,1], sep = "")
-}
-#pasting the common gene name to the ens_id of each gene so we can have both for the heatmap
-
-rownames(cluster) = common_and_ens_ids
-
-df <- as.data.frame(colData(dds)[,c("Condition","GrowthCondition")])
-rownames(df) <- colnames(cluster)
-
-pheatmap(cluster, cluster_rows=TRUE, show_rownames=TRUE,
-         cluster_cols=TRUE, show_colnames = T, annotation_col = df) #annotation_col=df,
+ 
 
 
 

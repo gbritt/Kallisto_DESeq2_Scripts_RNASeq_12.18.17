@@ -17,7 +17,7 @@ df <- as.data.frame(colData(dds)[,"Condition"])
 #df <- as.data.frame(colData(dds)[,c("Condition","GrowthCondition")])
 
 cluster = assay(ntd)[select,] # making an object out of genes to be clusterd
-colnames(cluster)= as.character(samples$sample) #giving colnames to clustered object
+colnames(cluster)= as.character(samplesdata$sample) #giving colnames to clustered object
 
 
 shared_results <- t2g[t2g[,2] %in% rownames(cluster),] # subsetting genes to transcripts mapping to add gene names to heatmap
