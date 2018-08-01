@@ -1,0 +1,5 @@
+"structure.c.31L..40L..49L..99L....Names...c..YNR073C....YDR344C..."
+"YNR073C"	31
+"YDR344C"	40
+"YEL070W"	49
+"YJL218W"	99

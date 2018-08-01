@@ -6,8 +6,10 @@ Prepare_DESeq2_12.28.17 = function(){
   library('tximport')
   library('tximportData')
   library('DESeq2')
-  
-  metadata = read.table("IgnaciometadataCombined.txt", sep = "\t", header = TRUE)
+  setwd("~/Documents/R/Scripts/Kallisto_DESeq2_Scripts_RNASeq_12.18.17/")
+ # metadata = read.table("load_files/IgnaciometadataCombined_rep3Dex_dropped.txt", sep = "\t", header = TRUE)
+ # metadata = read.table("load_files/metadata_Null_dropped.txt", sep = "\t", header = TRUE)
+  metadata = read.table("load_files/metadata_3reps.txt", sep = "\t", header = TRUE)
   metadata$path = as.character(metadata$path)
   metadata$Condition = as.factor(metadata$Condition)
   
@@ -15,15 +17,17 @@ Prepare_DESeq2_12.28.17 = function(){
   
   
   # import gene mappings (t2g) --------------------- this is a crucial section but corrently the 'mart' function fails half the time (do it by hand)
-  # mart <- biomaRt::useMart(biomart = "ENSEMBL_MART_ENSEMBL",
-  #                          dataset = "scerevisiae_gene_ensembl",
-  #                          host = 'ensembl.org')
   
-  
-  t2g <- biomaRt::getBM(attributes = c("ensembl_transcript_id", "ensembl_gene_id",
-                                       "external_gene_name", "description"), mart = mart)
-  t2g <- dplyr::rename(t2g, target_id = ensembl_transcript_id,
-                       ens_gene = ensembl_gene_id, ext_gene = external_gene_name)
+  t2g = readRDS('t2g.rda')
+  #  mart <- biomaRt::useMart(biomart = "ENSEMBL_MART_ENSEMBL",
+  #                           dataset = "scerevisiae_gene_ensembl",
+  #                           host = 'ensembl.org')
+  # 
+  # 
+  # t2g <- biomaRt::getBM(attributes = c("ensembl_transcript_id", "ensembl_gene_id",
+  #                                      "external_gene_name", "description"), mart = mart)
+  # t2g <- dplyr::rename(t2g, target_id = ensembl_transcript_id,
+  #                      ens_gene = ensembl_gene_id, ext_gene = external_gene_name)
  
 
  
@@ -48,9 +52,9 @@ Prepare_DESeq2_12.28.17 = function(){
   # Create DESeq2 object ----
   dds <- DESeqDataSetFromTximport(txi,
                                   colData = sampledata,
-                                  design = ~SequencingRun + Condition)
-  # Filter based on Rows with at least 35 counts ----
-  keep <- rowSums(counts(dds)) >= 35
+                                  design = ~SequencingRun + Condition) 
+  # Filter based on Rows with at least 20 counts ----
+  keep <- rowSums(counts(dds)) >= 20
   dds <- dds[keep,]
   
   #dds$Condition <- relevel(dds$Condition, ref = "WT Dex")
@@ -61,4 +65,6 @@ Prepare_DESeq2_12.28.17 = function(){
   saveRDS(dds, "dds.rda")
   saveRDS(sampledata, "sampledata.rda")
 }
+
+bitr_kegg("Z5100", fromType="kegg", toType='ncbi-geneid', organism='ece')
 

@@ -1,0 +1,3 @@
+"structure.c.87L..122L....Names...c..YDR134C....YOR028C..."
+"YDR134C"	87
+"YOR028C"	122

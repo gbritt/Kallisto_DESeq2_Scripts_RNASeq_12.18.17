@@ -1,0 +1,4 @@
+"structure.c.61L..115L..135L....Names...c..YLL024C....YLL026W..."
+"YLL024C"	61
+"YLL026W"	115
+"YMR186W"	135

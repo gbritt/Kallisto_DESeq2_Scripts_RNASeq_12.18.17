@@ -3,7 +3,7 @@
 
 
 
-DESeq2Clusterplot = function(filepath='/Users/HoltLab/Documents/R/Experiments/RNA_seq_ADH2_Nacho_12.28.17/Results/DESeq2/Sig_Dif_expressed_genes/WT_DEX_v_starve_pH_5_sig.txt', filename='WT_DEX_v_starve_pH_5_sig', numbergenes = 25){
+DESeq2Clusterplot = function(filepath='/Users/HoltLab/Documents/R/Experiments/RNA_seq_ADH2_Nacho_12.28.17/Results/DESeq2/Sig_Dif_expressed_genes/WT_DEX_v_starve_pH_5_sig.txt', filename='WT_DEX_v_starve_pH_5_sig', numbergenes = 35){
     library("pheatmap")
     library("DESeq2")
     dds = readRDS('dds.rda') #from wherever you saved the data structure (should automatically save in prepare)----
@@ -24,7 +24,7 @@ DESeq2Clusterplot = function(filepath='/Users/HoltLab/Documents/R/Experiments/RN
    
     #create transformation to have a more reasonable distribution of data----
     ntd <- normTransform(dds) # can probably play with different normalizations here 
-   
+   #ntd = vst(dds)
    
    cluster = assay(ntd)[select,] # making matrix with gene names and gene counts
    colnames(cluster)= as.character(sampledata$sample) #giving colnames to clustered object using the 'sampledata' variable created in the prepare script
@@ -48,13 +48,15 @@ DESeq2Clusterplot = function(filepath='/Users/HoltLab/Documents/R/Experiments/RN
    df <- as.data.frame(colData(dds)[,c("Condition","GrowthCondition")])
    rownames(df) <- colnames(cluster)
    
-   pheatmap(cluster, cluster_rows=TRUE, show_rownames=TRUE,
+   pheatmap(cluster, cluster_rows=TRUE, show_rownames=F,
             cluster_cols=TRUE, show_colnames = T, annotation_col = df)
     
 }
 
+#heatmap 2
 
- 
+my_palette <- colorRampPalette(c("red", "yellow", "green"))(n = 260)
 
-
-
+col_breaks = c(seq(-6,-2,length=100), # for red
+               seq(-1.9,1.9,length=60),  # for yellow
+               seq(2,6,length=100))

@@ -1,0 +1,3 @@
+"structure.28.29...Names...c..YOR142W.A....YPR158W.A..."
+"YOR142W-A"	28
+"YPR158W-A"	29
